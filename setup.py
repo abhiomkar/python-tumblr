@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(name='python-tumblr',
       version='0.1',
-      description='Python Distribution Utilities',
+      description='Python wrapper for Tumblr API',
       author='Ryan Cox',
       author_email='ryan.a.cox@gmail.com',
       license='Apache License 2.0',
