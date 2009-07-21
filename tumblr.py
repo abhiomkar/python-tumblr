@@ -19,12 +19,46 @@
 '''A wrapper library for Tumblr's public web API: http://www.tumblr.com/api'''
 
 __author__ = 'ryan.a.cox@gmail.com'
-__version__ = '0.1'
+__version__ = '0.2'
 
+"""
+
+	handle authenticated reads
+		post to /api/read with email/password
+	get working w/custom domains
+	edit posts
+		post to /api/write with a post-id
+	use authenticate api
+
+	<tumblr version="1.0">
+	  <user can-upload-audio="1" can-upload-aiff="1" can-upload-video="0" vimeo-login-url="http://www.vimeo.com/services/auth/?perms=delete&amp;sign_in%5Bemail%5D=ryanacox%40gmail.com&amp;api_key=f40bbbfaf1194768cb17c4368c8f2e74&amp;api_sig=ec29c7fdd8865310fc167ddc77cfb3ad"/>
+	  <tumblelog title="Untitled" name="apitest" url="http://apitest.tumblr.com/" type="public" avatar-url="http://assets.tumblr.com/images/default_avatar_128.gif" is-primary="yes"/>
+	  <tumblelog title="apitestgroup" private-id="282359" type="private"/>
+	</tumblr>
+			
+		handle multiple tumblelogs
+			Tumblelog class - get rid of Api
+				Tumblelog.get_tumblelogs(username,password)
+				Tumblelog(url,[username],[password])
+		handle private tumblelogs
+	refactor to use decorators indicating methods requiring authentication
+	test
+		groups, tags
+
+	new cool visualizations to show off capabilities
+		tag clould / wordle
+		post by hour
+		post by day of week
+		google app engine test site
+			do all above visualizations
+
+
+"""
 
 from urllib2 import Request, urlopen, URLError, HTTPError
 from urllib import urlencode, quote
 import base64
+import types
 import re
 
 try:
@@ -82,6 +116,7 @@ class TumblrIterator:
 		self.index += 1
 		return self.results['posts'][self.index-1]  
 
+
 class Api:
 	def __init__(self, name, email=None, password=None ):
 		self.name = name
@@ -89,12 +124,12 @@ class Api:
 		self.email = email 
 		self.password = password
 
+
 	def auth_check(self):
 		if self.is_authenticated:
 			return
-		url = 'http://www.tumblr.com/api/write'
+		url = 'http://www.tumblr.com/api/authenticate'
 		values = {	
-				'action': 'authenticate',
 				'generator' : GENERATOR, 
 				'email': self.email, 
 				'password' : self.password }
@@ -117,6 +152,9 @@ class Api:
 
 
 	def write_regular(self, title=None, body=None, **args): 
+		import pprint
+		pp = pprint.PrettyPrinter(indent=4)
+
 		if title:	
 			args['title'] = title
 		if body: 
@@ -205,20 +243,16 @@ class Api:
 		params['email'] = self.email
 		params['password'] = self.password
 		params['generator'] = GENERATOR
+
 		data = urlencode(params)
 		if headers:
 			req = Request(url, data, headers)
 		else:
 			req = Request(url, data)
-		newid = None
 		try: 
-			urlopen(req)
-			raise TumblrError("Error writing post")
-
+			ret = urlopen(req)
+			return self.read(id=ret.read())
 		except HTTPError, e:
-			if 201 == e.code:
-				newid = e.read() 
-				return self.read(id=newid)
 			raise TumblrError(e.read()) 
 
 	def read(self, id=None, start=0,max=2**31-1,type=None): 
@@ -226,7 +260,7 @@ class Api:
 			url = "http://%s.tumblr.com/api/read/json?id=%s" % (self.name,id)
 			response = urlopen(url)
 			page = response.read()
-			m = re.match("^.*?({.*}).*$", page,re.DOTALL | re.MULTILINE | re.UNICODE)
+			m = re.match("^.*?({.*}).*$", page,re.DOTALL | re.MULTILINE )
 			results = simplejson.loads(m.group(1))
 			if len(results['posts']) == 0:
 				return None 
@@ -234,6 +268,22 @@ class Api:
 			return results['posts'][0]  
 		else:	
 			return TumblrIterator(self.name,start,max,type)
+
+	def delete(self, id):
+		self.auth_check()
+		url = 'http://www.tumblr.com/api/delete'
+		params = {}
+		params['email'] = self.email
+		params['password'] = self.password
+		params['generator'] = GENERATOR
+		params['post-id'] = id 
+		data = urlencode(params)
+		req = Request(url, data)
+		try: 
+			urlopen(req)
+		except HTTPError, e:
+			raise TumblrError(e.read()) 
+		
 
 if __name__ == "__main__":
 	pass

@@ -18,9 +18,9 @@ import unittest
 import sys
 from tumblr import Api, TumblrAuthError, TumblrRequestError, TumblrError
 
-BLOG = 'YOU.tumblr.com'
-USER = 'YOUREMAIL'
-PASSWORD = 'YOURPASSWORD'
+BLOG = 'XXXX.tumblr.com'
+USER = 'XXXX'
+PASSWORD = 'XXX'
 
 class TumblrTests(unittest.TestCase):
 
@@ -46,6 +46,27 @@ class TumblrTests(unittest.TestCase):
 		self.assertRaises(TumblrError, api.write_conversation)
 		self.assertRaises(TumblrError, api.write_link)
 		self.assertRaises(TumblrError, api.write_video )
+
+	def testDelete(self):
+		api = Api(BLOG, USER, PASSWORD)
+
+		newpost = api.write_regular('title','body')
+		post = api.read(newpost['id'])
+		api.delete(post['id'])
+
+	def testEdit(self):
+		api = Api(BLOG, USER, PASSWORD)
+
+		newpost = api.write_regular('title','body')
+		np = {} 
+		np['post-id'] = newpost['id'] 
+		np['regular-body'] = 'edited body'
+		editedpost = api.write_regular(np)
+		import pprint
+		pp = pprint.PrettyPrinter(indent=4)
+		pp.pprint(newpost)
+		
+		assert editedpost['regular-body'] == 'body' 
 
 	def testWrite(self):
 		api = Api(BLOG, USER, PASSWORD)
@@ -88,6 +109,7 @@ class TumblrTests(unittest.TestCase):
 				freq[type] = 1
 		assert total > 0
 		for type in freq:
+			count = self.countType(api,type)
 			assert self.countType(api,type) == freq[type]
 
 	def countType(self, api, t):
