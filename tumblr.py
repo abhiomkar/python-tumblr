@@ -21,39 +21,6 @@
 __author__ = 'ryan.a.cox@gmail.com'
 __version__ = '0.2'
 
-"""
-
-	handle authenticated reads
-		post to /api/read with email/password
-	get working w/custom domains
-	edit posts
-		post to /api/write with a post-id
-	use authenticate api
-
-	<tumblr version="1.0">
-	  <user can-upload-audio="1" can-upload-aiff="1" can-upload-video="0" vimeo-login-url="http://www.vimeo.com/services/auth/?perms=delete&amp;sign_in%5Bemail%5D=ryanacox%40gmail.com&amp;api_key=f40bbbfaf1194768cb17c4368c8f2e74&amp;api_sig=ec29c7fdd8865310fc167ddc77cfb3ad"/>
-	  <tumblelog title="Untitled" name="apitest" url="http://apitest.tumblr.com/" type="public" avatar-url="http://assets.tumblr.com/images/default_avatar_128.gif" is-primary="yes"/>
-	  <tumblelog title="apitestgroup" private-id="282359" type="private"/>
-	</tumblr>
-			
-		handle multiple tumblelogs
-			Tumblelog class - get rid of Api
-				Tumblelog.get_tumblelogs(username,password)
-				Tumblelog(url,[username],[password])
-		handle private tumblelogs
-	refactor to use decorators indicating methods requiring authentication
-	test
-		groups, tags
-
-	new cool visualizations to show off capabilities
-		tag clould / wordle
-		post by hour
-		post by day of week
-		google app engine test site
-			do all above visualizations
-
-
-"""
 
 from urllib2 import Request, urlopen, URLError, HTTPError
 from urllib import urlencode, quote
