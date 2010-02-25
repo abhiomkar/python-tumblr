@@ -210,6 +210,7 @@ class Api:
 		params['email'] = self.email
 		params['password'] = self.password
 		params['generator'] = GENERATOR
+		params['group'] = self.name 
 
 		data = urlencode(params)
 		if headers:
