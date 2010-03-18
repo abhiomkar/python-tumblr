@@ -211,6 +211,7 @@ class Api:
 		params['password'] = self.password
 		params['generator'] = GENERATOR
 		params['group'] = self.name 
+		params['caption'] = params['caption'].encode('utf-8')
 
 		data = urlencode(params)
 		if headers:
